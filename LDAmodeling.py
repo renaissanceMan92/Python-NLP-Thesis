@@ -1,8 +1,8 @@
-
 from gensim.corpora import Dictionary
 from gensim.models import LdaModel
 from gensim import corpora
 from pprint import pprint
+from gensim import corpora, models
 import pyLDAvis
 import pyLDAvis.gensim_models as gensimvis
 
@@ -10,20 +10,23 @@ print('\nImporting corpus and dictionary...')
 dictionary = corpora.Dictionary.load('dictionary')
 corpus = corpora.MmCorpus('corpus')
 
+# Decision: use TF-IDF? How, why
+#tfidf = models.TfidfModel(corpus)
+#corpus_tfidf = tfidf[corpus]
+
 print('Performing topic modeling...')
-temp = dictionary[0]  # This is only to "load" the dictionary.
-num_topics = 30
-    # run LDA model.
+temp = dictionary[0]
+num_topics = 20 # Decision: how many topics?
 lda_model = LdaModel(
-    corpus = corpus, # alternatively change to corpus_tfidf.
+    corpus = corpus,
     id2word = dictionary.id2token,
-    chunksize = 4000,
+    chunksize = 4000, # decision: what chunksize?
     alpha = 'auto',
     eta = 'auto',
-    iterations = 100,
+    iterations = 50, # decision: how many iterations?
     num_topics = num_topics,
-    passes = 20,
-    eval_every = None
+    passes = 20, # decision: how many passes?
+    eval_every = None,
 )
 topics = lda_model.top_topics(corpus)
 
