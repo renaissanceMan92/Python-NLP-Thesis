@@ -14,11 +14,20 @@ with open('submissionsWithComments.csv', encoding='utf-8') as file:
     csv_reader = csv.reader(file, delimiter = '|')
     for row in csv_reader:
         try:
-            docs.append(row[1])
-            docs.append(row[2])
-            docs.append(row[6])
-        except IndexError:
+            dateCreatedUtc = int(row[5])
+            #if(dateCreatedUtc < 1577833200) :  #Posts before 2020-01-01
+            if(1 == 1) :        #All posts                          
+            #if(dateCreatedUtc > 1577833199): #posts after 2020-01-01       
+                try:
+                    docs.append(row[1])
+                    docs.append(row[2])
+                    docs.append(row[6])
+                except IndexError:
+                    pass
+        except:
             pass
+            
+        
 
 print('Removing URLs...')
 temp = []
