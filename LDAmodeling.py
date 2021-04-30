@@ -39,4 +39,13 @@ print('Creating HTML visualization...')
 visualisation = gensimvis.prepare(lda_model, corpus, dictionary)
 pyLDAvis.save_html(visualisation, 'LDA_Visualization.html')
 
+print('Saving logfile...')
+log_file = open('logfile.txt', 'w')
+log_file.write('\nNumber of unique tokens in dictionary (after filtering): %d' % len(dictionary))
+log_file.write('\nNumber of documents in corpus: %d' % len(corpus))
+log_file.write('\nNumber of topics: %d' % num_topics)
+log_file.write('\nNumber of iterations: %d' % iterations)
+log_file.write('\nAverage topic coherence: %.4f.' % avg_topic_coherence)
+log_file.close()
+
 print("The program is completed.\n")
