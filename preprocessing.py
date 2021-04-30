@@ -15,9 +15,9 @@ with open('submissionsWithComments.csv', encoding='utf-8') as file:
     for row in csv_reader:
         try:
             dateCreatedUtc = int(row[5])
-            #if(dateCreatedUtc < 1577833200) :  #Posts before 2020-01-01
+            #if(dateCreatedUtc < 1583881200) :  #Posts before 2020-03-11 /Lockdown
             if(1 == 1) :        #All posts                          
-            #if(dateCreatedUtc > 1577833199): #posts after 2020-01-01       
+            #if(dateCreatedUtc > 1583881199): #posts after 2020-03-11       
                 try:
                     docs.append(row[1])
                     docs.append(row[2])
