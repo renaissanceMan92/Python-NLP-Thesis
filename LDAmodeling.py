@@ -5,8 +5,10 @@ from pprint import pprint
 from gensim import corpora, models
 import pyLDAvis
 import pyLDAvis.gensim_models as gensimvis
-from gensim.parsing.preprocessing import preprocess_string, strip_punctuation,strip_numeric
+from gensim.parsing.preprocessing import STOPWORDS, preprocess_string, strip_punctuation,strip_numeric
 import os
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 print('\nImporting corpus and dictionary...')
 dictionary = corpora.Dictionary.load('dictionary')
@@ -37,6 +39,21 @@ os.makedirs('Output/Models',exist_ok=True)
 #save the model
 lda_model.save('Output/Models/trained_model')
 
+#Create WordCloud from the model
+if not os.path.exists('Output/WordClouds'):
+    os.mkdir('Output/WordClouds')
+for t in range(lda_model.num_topics):
+    plt.figure()
+    wc = WordCloud(background_color="white", max_words = 1000, stopwords=STOPWORDS)
+    wc.fit_words(dict(lda_model.show_topic(t, 200)))
+    wc.to_file(f'Output/WordClouds/wordcloud_topic_{str(t)}.png')
+    
+    #To Show word clouds with matplot.pyplot
+    # plt.imshow(wc, interpolation ='bilinear')
+    # plt.axis('off')
+    # plt.title("Topic #" + str(t))
+    # plt.show()
+
 #Get top topics
 topics = lda_model.top_topics(corpus)
 
@@ -62,8 +79,7 @@ for topic in topics:
     for k,v in topic[0]:
         words.append(v)
     joined = ", ".join(words)
-    top_topics.write("Topic {}:\n[{}]\n".format(topics.index(topic),joined))
-    
+    top_topics.write("Topic {}:\n[{}]\n".format(topics.index(topic),joined))    
 top_topics.close()
 
 
@@ -86,5 +102,7 @@ log_file.write('\nNumber of topics: %d' % num_topics)
 log_file.write('\nNumber of iterations: %d' % lda_model.iterations)
 log_file.write('\nAverage topic coherence: %.4f.' % avg_topic_coherence)
 log_file.close()
+
+
 
 print("The program is completed.\n")
