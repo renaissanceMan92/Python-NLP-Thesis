@@ -1,3 +1,4 @@
+from collections import Counter
 from gensim.corpora import Dictionary
 from gensim.models import LdaModel
 from gensim import corpora
@@ -9,17 +10,29 @@ from gensim.parsing.preprocessing import STOPWORDS, preprocess_string, strip_pun
 import os
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+import pandas as pd
+import matplotlib.colors as mcolors
+import DataTypes
+
 
 print('\nImporting corpus and dictionary...')
-dictionary = corpora.Dictionary.load('dictionary')
-corpus = corpora.MmCorpus('corpus')
+dictionary = corpora.Dictionary.load(f'raw/dictionary_{DataTypes.ALL_DATA}')
+corpus = corpora.MmCorpus(f'raw/corpus_{DataTypes.ALL_DATA}')
 
-# Decision: use TF-IDF? How, why
+
+data_ready= []
+with open(f'raw/data_ready_{DataTypes.POST_COVID_DATA}.txt','r') as file:
+    for line in file.readlines():
+        current = line[:-1]
+        data_ready.append(current)
+        
+#Decision: use TF-IDF? How, why
 #tfidf = models.TfidfModel(corpus)
 #corpus_tfidf = tfidf[corpus]
 
+#Building the model.
 print('Performing topic modeling...')
-temp = dictionary[0]
+temp = dictionary[0] #???? what is this?
 num_topics = 20 # Decision: how many topics?
 lda_model = LdaModel(
     corpus = corpus,
@@ -33,15 +46,97 @@ lda_model = LdaModel(
     eval_every = None,
 )
 
+#Get top topics
+topics = lda_model.top_topics(corpus)
+
+
+
+##########################################################
+
+def format_topics_sentences(ldamodel=lda_model, corpus=corpus, texts=None):
+    # Init output
+    sent_topics_df = pd.DataFrame()
+
+    # Get main topic in each document
+    for i, row in enumerate(ldamodel[corpus]):
+        row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        # Get the Dominant topic, Perc Contribution and Keywords for each document
+        for j, (topic_num, prop_topic) in enumerate(row):
+            if j == 0:  # => dominant topic
+                wp = ldamodel.show_topic(topic_num)
+                topic_keywords = ", ".join([word for word, prop in wp])
+                sent_topics_df = sent_topics_df.append(pd.Series([int(topic_num), round(prop_topic,4), topic_keywords]), ignore_index=True)
+            else:
+                break
+    sent_topics_df.columns = ['Dominant_Topic', 'Perc_Contribution', 'Topic_Keywords']
+
+    # Add original text to the end of the output
+    contents = pd.Series(texts)
+    sent_topics_df = pd.concat([sent_topics_df, contents], axis=1)
+    return(sent_topics_df)
+
+
+df_topic_sents_keywords = format_topics_sentences(ldamodel=lda_model, corpus=corpus, texts=data_ready)
+
+# Format
+df_dominant_topic = df_topic_sents_keywords.reset_index()
+df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
+
+# Show
+
+text_file = open("Output/dominant_topic_per_sentence.html", "w")
+text_file.write(df_dominant_topic.to_html())
+text_file.close()
+# print(df_dominant_topic.head(10))
+
+##########################################################
+# Group top 5 sentences under each topic
+sent_topics_sorteddf_mallet = pd.DataFrame()
+
+sent_topics_outdf_grpd = df_topic_sents_keywords.groupby('Dominant_Topic')
+
+for i, grp in sent_topics_outdf_grpd:
+    sent_topics_sorteddf_mallet = pd.concat([sent_topics_sorteddf_mallet, 
+                                             grp.sort_values(['Perc_Contribution'], ascending=[0]).head(1)], 
+                                            axis=0)
+
+# Reset Index    
+sent_topics_sorteddf_mallet.reset_index(drop=True, inplace=True)
+
+# Format
+sent_topics_sorteddf_mallet.columns = ['Topic_Num', "Topic_Perc_Contrib", "Keywords", "Text"]
+
+# Show
+text_file = open("Output/most_representative_document.html", "w")
+text_file.write(sent_topics_sorteddf_mallet.to_html())
+text_file.close()
+
+###############################################################
+'''
+Section: Save output and other files.
+'''
 #Create folder for all output files
 os.makedirs('Output/Models',exist_ok=True)
-
-#save the model
-lda_model.save('Output/Models/trained_model')
-
-#Create WordCloud from the model
 if not os.path.exists('Output/WordClouds'):
     os.mkdir('Output/WordClouds')
+
+# save the model
+lda_model.save('Output/Models/trained_model')
+
+#Uses a topics_dict to create a word cloud of all topics within
+topics_dict={}
+for i,t in lda_model.show_topics(formatted = False):
+    for word,weight in t:
+        topics_dict[word]=weight 
+wc_all_topics = WordCloud(max_words= 100,stopwords =STOPWORDS)
+wc_all_topics.fit_words(dict(topics_dict))
+wc_all_topics.to_file('Output/WordClouds/wordcloud_all_topics.png')
+#to show it:
+# plt.imshow(wc_all_topics, interpolation ='bilinear')
+# plt.axis('off')
+# plt.show()
+
+#Create word cloud for each topic
 for t in range(lda_model.num_topics):
     plt.figure()
     wc = WordCloud(background_color="white", max_words = 1000, stopwords=STOPWORDS)
@@ -53,9 +148,6 @@ for t in range(lda_model.num_topics):
     # plt.axis('off')
     # plt.title("Topic #" + str(t))
     # plt.show()
-
-#Get top topics
-topics = lda_model.top_topics(corpus)
 
 # Save topics to file topics_raw.txt
 topics_file_raw = open('Output/topics_raw.txt','w')
@@ -102,7 +194,5 @@ log_file.write('\nNumber of topics: %d' % num_topics)
 log_file.write('\nNumber of iterations: %d' % lda_model.iterations)
 log_file.write('\nAverage topic coherence: %.4f.' % avg_topic_coherence)
 log_file.close()
-
-
 
 print("The program is completed.\n")
