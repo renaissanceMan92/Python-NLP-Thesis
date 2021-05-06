@@ -46,10 +46,13 @@ lda_model = LdaModel(
     eval_every = None,
 )
 
+#Create folder for all output files
+os.makedirs('Output/Models',exist_ok=True)
+if not os.path.exists('Output/WordClouds'):
+    os.mkdir('Output/WordClouds')
+    
 #Get top topics
 topics = lda_model.top_topics(corpus)
-
-
 
 ##########################################################
 
@@ -115,10 +118,7 @@ text_file.close()
 '''
 Section: Save output and other files.
 '''
-#Create folder for all output files
-os.makedirs('Output/Models',exist_ok=True)
-if not os.path.exists('Output/WordClouds'):
-    os.mkdir('Output/WordClouds')
+
 
 # save the model
 lda_model.save('Output/Models/trained_model')
@@ -128,7 +128,7 @@ topics_dict={}
 for i,t in lda_model.show_topics(formatted = False):
     for word,weight in t:
         topics_dict[word]=weight 
-wc_all_topics = WordCloud(max_words= 100,stopwords =STOPWORDS)
+wc_all_topics = WordCloud(max_words= 10,stopwords =STOPWORDS)
 wc_all_topics.fit_words(dict(topics_dict))
 wc_all_topics.to_file('Output/WordClouds/wordcloud_all_topics.png')
 #to show it:
@@ -139,7 +139,7 @@ wc_all_topics.to_file('Output/WordClouds/wordcloud_all_topics.png')
 #Create word cloud for each topic
 for t in range(lda_model.num_topics):
     plt.figure()
-    wc = WordCloud(background_color="white", max_words = 1000, stopwords=STOPWORDS)
+    wc = WordCloud(background_color="white", max_words = 10, stopwords=STOPWORDS)
     wc.fit_words(dict(lda_model.show_topic(t, 200)))
     wc.to_file(f'Output/WordClouds/wordcloud_topic_{str(t)}.png')
     

@@ -62,10 +62,13 @@ def process_data(data):
 
     #Removing irrelevant words
     print('Removing irrelevant words...')
-    #custom_stopwords = ['remote', 'work', 'working', 'would', 'also'] # most pop irrelevant words.
-    data = [[token for token in doc if token not in set(stopwords.words('english'))
+    custom_stopwords = ['amp', 'would', 'get', 'use', 'make'] # most pop irrelevant words.
+    stpwrds = stopwords.words('english')
+    stpwrds.extend(custom_stopwords)
+    data = [[token for token in doc if token not in set(stpwrds)
     #and token not in custom_stopwords
     and token.isalnum()
+    and not token.isdigit()
     and len(token) > 2] for doc in data]
 
     #Removing empty documents
