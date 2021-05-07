@@ -187,6 +187,7 @@ def run_modelling(data_type):
 
     print('Saving logfile...')
     log_file = open(f'Output/{data_type}/logfile.txt', 'w')
+    log_file.write(f'Log for {data_type}:')
     log_file.write('\nNumber of unique tokens in dictionary (after filtering): %d' % len(dictionary))
     log_file.write('\nNumber of documents in corpus: %d' % len(corpus))
     log_file.write('\nNumber of topics: %d' % num_topics)
