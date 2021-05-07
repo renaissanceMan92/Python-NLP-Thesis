@@ -62,7 +62,7 @@ def process_data(data):
 
     #Removing irrelevant words
     print('Removing irrelevant words...')
-    custom_stopwords = ['amp', 'would', 'get', 'use', 'make'] # most pop irrelevant words.
+    custom_stopwords = ['amp', 'get', 'use', 'make','would','x200b']
     stpwrds = stopwords.words('english')
     stpwrds.extend(custom_stopwords)
     data = [[token for token in doc if token not in set(stpwrds)
@@ -118,7 +118,3 @@ with open(f'raw/data_ready_{DataTypes.PRE_COVID_DATA}.txt',encoding='utf-8',mode
 
 with open(f'raw/data_ready_{DataTypes.POST_COVID_DATA}.txt',encoding='utf-8',mode='w') as file:
     file.writelines("%s\n" % topic for topic in data_post_covid_processed)
-
-
-
-
