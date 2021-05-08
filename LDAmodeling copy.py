@@ -1,6 +1,6 @@
 from collections import Counter
 from gensim.corpora import Dictionary
-from gensim.models import LdaModel
+from gensim.models import LdaModel, coherencemodel
 from gensim import corpora
 from pprint import pprint
 from gensim import corpora, models
@@ -13,10 +13,14 @@ from wordcloud import WordCloud
 import pandas as pd
 import matplotlib.colors as mcolors
 import DataTypes
+from gensim.models import CoherenceModel
+from multiprocessing import Process, freeze_support
+
+
 
 
 def run_modelling(data_type):
-        #Create folder for all output files
+    #Create folder for all output files
     os.makedirs(f'Output/{data_type}/Models',exist_ok=True)
     if not os.path.exists(f'Output/{data_type}/WordClouds'):
         os.mkdir(f'Output/{data_type}/WordClouds')
@@ -37,7 +41,7 @@ def run_modelling(data_type):
 
     #Building the model.
     print('Performing topic modeling...')
-    temp = dictionary[0] #???? what is this?
+    temp = dictionary[0] # This is only to "load" the dictionary.
     num_topics = 20 # Decision: how many topics?
     lda_model = LdaModel(
         corpus = corpus,
@@ -114,11 +118,12 @@ def run_modelling(data_type):
     text_file.close()
 
     ###############################################################
+    
+    
+    ###############################################################
     '''
     Section: Save output and other files.
     '''
-
-
     # save the model
     lda_model.save(f'Output/{data_type}/Models/trained_model')
 
@@ -137,12 +142,12 @@ def run_modelling(data_type):
 
     #Create word cloud for each topic
     for t in range(lda_model.num_topics):
-        plt.figure()
         wc = WordCloud(background_color="white", max_words = 20, stopwords=STOPWORDS)
         wc.fit_words(dict(lda_model.show_topic(t, 200)))
         wc.to_file(f'Output/{data_type}/WordClouds/wordcloud_topic_{str(t)}.png')
         
         #To Show word clouds with matplot.pyplot
+        # plt.figure()
         # plt.imshow(wc, interpolation ='bilinear')
         # plt.axis('off')
         # plt.title("Topic #" + str(t))
@@ -184,7 +189,6 @@ def run_modelling(data_type):
     pyLDAvis.save_html(visualisation, f'Output/{data_type}/LDA_Visualization.html')
     pyLDAvis.save_json(visualisation,f'Output/{data_type}/LDA_Visualization.json')
 
-
     print('Saving logfile...')
     log_file = open(f'Output/{data_type}/logfile.txt', 'w')
     log_file.write(f'Log for {data_type}:')
@@ -193,9 +197,12 @@ def run_modelling(data_type):
     log_file.write('\nNumber of topics: %d' % num_topics)
     log_file.write('\nNumber of iterations: %d' % lda_model.iterations)
     log_file.write('\nAverage topic coherence: %.4f.' % avg_topic_coherence)
+    log_file.write(f'\nModel perplexity: {lda_model.log_perplexity(corpus)}')
     log_file.close()
 
-    print(f"The program is completed for {data_type}.\n")
-    
+    print('============================================')
+    print(f"The program is completed for {data_type}.")
+    print('============================================')
+
 run_modelling(DataTypes.POST_COVID_DATA)
 run_modelling(DataTypes.PRE_COVID_DATA)
