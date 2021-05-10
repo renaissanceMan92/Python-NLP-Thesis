@@ -17,18 +17,21 @@ from gensim.models import CoherenceModel
 from multiprocessing import Process, freeze_support
 
 
-
-
 def run_modelling(data_type):
+    #This functions run all the methods to perform topic modelling and save its outputs.
+    #Parameter: data_type is a string of data type as in DataTypes.py (post covid or pre covid)
+    
     #Create folder for all output files
     os.makedirs(f'Output/{data_type}/Models',exist_ok=True)
     if not os.path.exists(f'Output/{data_type}/WordClouds'):
         os.mkdir(f'Output/{data_type}/WordClouds')
         
+    #Import dictionary and corpus for this data.
     print('\nImporting corpus and dictionary...')
     dictionary = corpora.Dictionary.load(f'raw/dictionary_{data_type}')
     corpus = corpora.MmCorpus(f'raw/corpus_{data_type}')
 
+    #Import list of tokens (word lists) for this data type.
     data_ready= []
     with open(f'raw/data_ready_{data_type}.txt','r',encoding='UTF-8') as file:
         for line in file.readlines():
@@ -40,26 +43,28 @@ def run_modelling(data_type):
     #corpus_tfidf = tfidf[corpus]
 
     #Building the model.
+    #Creates the model with prespecified number of topics, iterations and passes.
     print('Performing topic modeling...')
     temp = dictionary[0] # This is only to "load" the dictionary.
-    num_topics = 20 # Decision: how many topics?
+    num_topics = 35 # Decision: how many topics?
     lda_model = LdaModel(
         corpus = corpus,
         id2word = dictionary.id2token,
         chunksize = 4000, # decision: what chunksize?
         alpha = 'auto',
         eta = 'auto',
-        iterations = 50, # decision: how many iterations?
+        iterations = 100, # decision: how many iterations?
         num_topics = num_topics,
-        passes = 20, # decision: how many passes?
+        passes = 100, # decision: how many passes?
         eval_every = None,
     )
     #Get top topics
     topics = lda_model.top_topics(corpus)
 
     ##########################################################
-
+    #This section is to get the dominant topic per each sentence.
     def format_topics_sentences(ldamodel=lda_model, corpus=corpus, texts=None):
+        #Prepares and format the topics in a data frame.
         # Init output
         sent_topics_df = pd.DataFrame()
 
@@ -96,6 +101,7 @@ def run_modelling(data_type):
     # print(df_dominant_topic.head(10))
 
     ##########################################################
+    #This section is to get the most representative documents for each topic
     # Group top 5 sentences under each topic
     sent_topics_sorteddf_mallet = pd.DataFrame()
 
@@ -118,9 +124,7 @@ def run_modelling(data_type):
     text_file.close()
 
     ###############################################################
-    
-    
-    ###############################################################
+       
     '''
     Section: Save output and other files.
     '''
@@ -200,9 +204,17 @@ def run_modelling(data_type):
     log_file.write(f'\nModel perplexity: {lda_model.log_perplexity(corpus)}')
     log_file.close()
 
-    print('============================================')
-    print(f"The program is completed for {data_type}.")
-    print('============================================')
+    # print('============================================')
+    # print(f"The program is completed for {data_type}.")
+    # print('============================================')
 
-run_modelling(DataTypes.POST_COVID_DATA)
-run_modelling(DataTypes.PRE_COVID_DATA)
+
+#ٌRun topic modelling 10 times to compare and get best model. 
+for x in range(0,10):
+    print('============================')
+    print(f'Running iteration nr.{x}')
+    print('============================')
+    run_modelling(DataTypes.POST_COVID_DATA)
+    run_modelling(DataTypes.PRE_COVID_DATA)
+    os.rename('Output', f'Output_{x}')
+    print(f'done with iteration nr.{x}')

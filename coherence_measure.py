@@ -72,19 +72,20 @@ def compute_coherence_values(dictionary, corpus, texts, limit, start, step):
         chunksize = 4000, # decision: what chunksize?
         alpha = 'auto',
         eta = 'auto',
-        iterations = 50, # decision: how many iterations?
+        iterations = 1000, # decision: how many iterations?
         num_topics = num_topics,
-        passes = 20, # decision: how many passes?
+        passes = 100, # decision: how many passes?
         eval_every = None,
         )
         avg_topic_coherence = sum([t[1] for t in model.top_topics(corpus)]) / num_topics
         values[num_topics] = avg_topic_coherence
-
-        # if __name__ == "__main__":
-        #     coherencemodel = CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
-        #     coherence_model =coherencemodel.get_coherence()
-        #     coherence_values.append(coherence_model)
-        #     print(coherence_model)
+        
+        # print('now trying coherence with c_v')
+        # # if __name__ == "__main__":
+        # coherencemodel = CoherenceModel(model=model, texts=texts, dictionary=dictionary, coherence='c_v')
+        # coherence_model =coherencemodel.get_coherence()
+        # print(coherence_model)
+        
 
     return values
 

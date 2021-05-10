@@ -13,7 +13,9 @@ from wordcloud import WordCloud
 import pandas as pd
 import matplotlib.colors as mcolors
 import DataTypes
-
+'''
+This is an older version of the LDAmodeling script. Checkout the newer one: LDAmodeling_new.py
+'''
 data_type = DataTypes.POST_COVID_DATA
 
 #Create folder for all output files
