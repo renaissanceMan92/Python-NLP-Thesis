@@ -15,7 +15,7 @@ import matplotlib.colors as mcolors
 import DataTypes
 from gensim.models import CoherenceModel
 
-
+#This script is to find K number of topics the gives the best coherence.
 data_type=DataTypes.POST_COVID_DATA
 
 data_ready= []
