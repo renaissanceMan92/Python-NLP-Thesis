@@ -136,7 +136,7 @@ def run_modelling(data_type):
     for i,t in lda_model.show_topics(formatted = False):
         for word,weight in t:
             topics_dict[word]=weight 
-    wc_all_topics = WordCloud(max_words= 20,stopwords =STOPWORDS)
+    wc_all_topics = WordCloud(max_words= 50,stopwords =STOPWORDS, width=1600,height=800)
     wc_all_topics.fit_words(dict(topics_dict))
     wc_all_topics.to_file(f'Output/{data_type}/WordClouds/wordcloud_all_topics.png')
     #to show it:
