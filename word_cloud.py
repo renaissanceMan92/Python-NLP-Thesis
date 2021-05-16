@@ -3,7 +3,7 @@ from gensim.models import LdaModel
 import DataTypes
 import ast
 from collections import Counter
-data_type = DataTypes.PRE_COVID_DATA
+data_type = DataTypes.POST_COVID_DATA
 lda_model = LdaModel.load(f'Output/{data_type}/Models/trained_model')
 
 # topics_dict={}
@@ -32,7 +32,10 @@ for topic in data_ready:
         data_as_words_list.append(word) #Add each word to list of words
         
 counts= Counter(data_as_words_list) #Count frequency of each word in list
+if 'nigger' in counts: #this words appear in most common words but the submissions are only scams.
+    counts.pop('nigger',None)
 wc_all_topics_by_frequency = WordCloud(max_words=50,stopwords=STOPWORDS,width=1600,height=800)    
 wc_all_topics_by_frequency.fit_words(dict(counts.most_common(100))) #Take 100 most common words, take best 50 after filtering with stopwords
+# print(wc_all_topics_by_frequency.stopwords)
 print(counts.most_common(100))
-wc_all_topics_by_frequency.to_file(f'Output/{data_type}/WordClouds/wordcloud_all_topics_by_frequency.png')
+# wc_all_topics_by_frequency.to_file(f'Output/{data_type}/WordClouds/wordcloud_all_topics_by_frequency.png')
