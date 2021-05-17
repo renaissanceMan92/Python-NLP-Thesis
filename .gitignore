@@ -1,0 +1,15 @@
+Output/
+raw/
+raw/corpus_all
+raw/corpus_all.index
+raw/corpus_post_covid
+raw/corpus_post_covid.index
+raw/corpus_pre_covid
+raw/corpus_pre_covid.index
+raw/data_ready_all.txt
+raw/data_ready_post_covid.txt
+raw/data_ready_pre_covid.txt
+raw/dictionary_all
+raw/dictionary_post_covid
+raw/dictionary_pre_covid
+__pycache__/
